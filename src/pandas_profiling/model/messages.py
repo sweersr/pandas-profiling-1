@@ -63,6 +63,9 @@ class MessageType(Enum):
     UNIFORM = 14
     """The variable is uniformly distributed"""
 
+    NORMAL = 16
+    """The variable is normal distributed"""
+
 
 class Message(object):
     """A message object (type, values, column)."""
@@ -264,9 +267,13 @@ def check_variable_messages(col: str, description: dict) -> List[Message]:
         chi_squared_threshold = config["vars"]["num"]["chi_squared_threshold"].get(
             float
         )
-        if 0.0 < chi_squared_threshold < description["chi_squared"][1]:
+        if 0.0 < chi_squared_threshold < description["chi_squared"][1] and description["normal_test"][1] < description["chi_squared"][1]:
             messages.append(
                 Message(column_name=col, message_type=MessageType.UNIFORM, values={})
+            )
+        elif 0.0 < chi_squared_threshold < description["normal_test"][1] and description["normal_test"][1] > description["chi_squared"][1]:
+            messages.append(
+                Message(column_name=col, message_type=MessageType.NORMAL, values={})
             )
 
         # Zeros

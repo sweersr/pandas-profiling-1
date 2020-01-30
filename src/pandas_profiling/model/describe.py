@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 import numpy as np
 import pandas as pd
 from astropy.stats import bayesian_blocks
-from scipy.stats.stats import chisquare
+from scipy.stats.stats import chisquare, normaltest
 
 from pandas_profiling import __version__
 from pandas_profiling.config import config as config
@@ -74,6 +74,7 @@ def describe_numeric_1d(series: pd.Series, series_description: dict) -> dict:
     if chi_squared_threshold > 0.0:
         histogram = np.histogram(series[series.notna()].values, bins="auto")[0]
         stats["chi_squared"] = chisquare(histogram)
+        stats["normal_test"] = normaltest(series)
 
     stats["range"] = stats["max"] - stats["min"]
     stats.update(
@@ -574,6 +575,7 @@ def describe(df: pd.DataFrame) -> dict:
         messages += check_variable_messages(col, description)
 
     messages += check_correlation_messages(correlations)
+    messages.sort(key=lambda x: str(x.message_type))
 
     package = {
         "pandas_profiling_version": __version__,
